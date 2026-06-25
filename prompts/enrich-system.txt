@@ -1,0 +1,68 @@
+You receive a raw_source string and a quote from a commonplace book.
+Return ONLY valid JSON — no markdown, no prose, nothing else. Never explain, never apologize. If you cannot find the source, make your best guess and still return JSON:
+
+{
+  "medium": "<book|film|tv|article|video|social|spoken>",
+  "source_label": "<human-readable label for the work or person>",
+  "resolved_link": "<URL or null>",
+  "tags": ["tag1", "tag2"],
+  "corrected_quote": "<quote with spelling, grammar, and punctuation fixed>"
+}
+
+Quote correction rules:
+- Fix spelling mistakes, grammatical errors, and punctuation.
+- Preserve the original wording and meaning exactly — do not paraphrase or improve phrasing.
+- Preserve intentional stylistic choices (e.g. e.e. cummings lowercase, em-dashes, ellipses).
+- If the quote is already correct, return it unchanged.
+- If the quote contains Hinglish (Hindi transliterated into English), preserve all Hinglish words exactly as written. Only correct capitalization and punctuation — never substitute a Hinglish word with an English equivalent or translation.
+
+Always run a web search on raw_source before classifying.
+
+Classification rules:
+
+- book → novel, non-fiction, poetry.
+  source_label = "Title by Author" (e.g. "In the Realm of Hungry Ghosts by Gabor Maté").
+  If raw_source includes a character name: "Character, Title by Author".
+  resolved_link = Goodreads page for that specific title (search to find it).
+
+- film → movie.
+  source_label = "Title (Year)" (e.g. "The Social Network (2010)").
+  resolved_link = IMDb page (imdb.com/title/...) found via web search — do not guess the URL.
+
+- tv → traditional TV show OR internet/audio podcast.
+  Traditional TV show: source_label = "Character, Episode Title, Show" if a character is known; else "Episode Title, Show".
+  Internet podcast (YouTube, Spotify, audio-only): source_label = "Host Name, Podcast Name" (e.g. "Naval Ravikant, The Tim Ferriss Show").
+    resolved_link = YouTube episode URL if available; Spotify episode URL as fallback.
+  Traditional TV: resolved_link = IMDb show page found via web search.
+
+- article → news article or blog post.
+  source_label = "Author, Title". If author unknown, use just the title.
+  resolved_link = the article URL.
+  If raw_source contains a URL: use it verbatim as resolved_link; fetch/search to extract author and title.
+  If raw_source gives author + title directly: use as-is.
+  If NO URL in raw_source: search using both the raw_source AND the quote text to find the original article URL.
+
+- video → YouTube video that is NOT a podcast.
+  source_label = "Channel, Video Title" (e.g. "Kurzgesagt, Optimistic Nihilism").
+  resolved_link = direct YouTube video URL found via search.
+
+- social → Instagram, Twitter/X, TikTok.
+  source_label = null. resolved_link = null.
+
+- spoken → person, public figure or personal acquaintance, not tied to a specific work.
+  resolved_link = null.
+  Search the name. If the person is a recognizable public figure: source_label = "Name" (e.g. "David Foster Wallace").
+  If the person is not findable or is likely a personal acquaintance: source_label = "— Name" (e.g. "— Yaash").
+
+source_label examples:
+  book: "In the Realm of Hungry Ghosts by Gabor Maté"
+  book with character: "Don Quixote, Don Quixote by Miguel de Cervantes"
+  film: "The Social Network (2010)"
+  tv (show): "The One Where Nobody's Ready, Friends"
+  tv (podcast): "Naval Ravikant, The Tim Ferriss Show"
+  article: "Atul Gawande, The Cost of Living"
+  video: "Kurzgesagt, Optimistic Nihilism"
+  spoken (public): "David Foster Wallace"
+  spoken (personal): "— Yaash"
+
+tags: 3–6 descriptive lowercase tags. Include author/creator name if specific. Include theme words.

@@ -1,0 +1,207 @@
+@import "tailwindcss";
+
+:root {
+  --line-h: 26px;
+  --margin-line: 44px;
+  --line-color: #c8d8e8;
+  --margin-color: #e8a0a0;
+  --ink: #1a1a2e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: #f5f0eb;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+/* Lined notebook page */
+.lined-page {
+  position: relative;
+  background-color: #fdfcfa;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent calc(var(--line-h) - 1px),
+      var(--line-color) calc(var(--line-h) - 1px),
+      var(--line-color) var(--line-h)
+    );
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* Spine + page-lift overlay — sits over the whole book spread */
+.book-depth-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  background: linear-gradient(to right,
+    rgba(120,90,60,0.10)  0%,
+    rgba(120,90,60,0.04)  6%,
+    transparent           16%,
+    transparent           38%,
+    rgba(0,0,0,0.07)      46%,
+    rgba(0,0,0,0.22)      50%,
+    rgba(0,0,0,0.07)      54%,
+    transparent           62%,
+    transparent           84%,
+    rgba(120,90,60,0.04)  94%,
+    rgba(120,90,60,0.10)  100%
+  );
+}
+
+
+/* Composition notebook cover */
+.cover-composition {
+  background-color: #c0182a;
+  background-image:
+    radial-gradient(ellipse 25% 35% at 15% 25%, rgba(10,2,2,0.9) 0%, transparent 100%),
+    radial-gradient(ellipse 30% 22% at 80% 18%, rgba(10,2,2,0.85) 0%, transparent 100%),
+    radial-gradient(ellipse 20% 40% at 60% 75%, rgba(10,2,2,0.8) 0%, transparent 100%),
+    radial-gradient(ellipse 35% 18% at 40% 92%, rgba(10,2,2,0.75) 0%, transparent 100%),
+    radial-gradient(ellipse 15% 28% at 90% 58%, rgba(10,2,2,0.85) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 10% at 50% 45%, rgba(10,2,2,0.6) 0%, transparent 100%),
+    radial-gradient(ellipse 30% 15% at 28% 68%, rgba(250,210,210,0.5) 0%, transparent 100%),
+    radial-gradient(ellipse 12% 25% at 72% 38%, rgba(250,210,210,0.4) 0%, transparent 100%),
+    radial-gradient(ellipse 25% 12% at 50% 10%, rgba(210,40,40,0.7) 0%, transparent 100%);
+}
+
+/* Icon nav */
+.icon-nav {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(80, 55, 45, 0.45);
+  padding: 4px;
+  line-height: 0;
+  transition: color 0.15s;
+}
+
+.icon-btn:hover { color: rgba(80, 55, 45, 0.85); }
+.icon-btn-search:hover { color: #f5f0eb; }
+.icon-btn-lock:hover   { color: #c0182a; }
+
+/* Overlay */
+.overlay-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 2, 0.85);
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+  backdrop-filter: blur(2px);
+}
+
+/* Gold shimmer on unlock — two layers */
+@keyframes unlock-glow {
+  0%   { opacity: 0; transform: scale(0.75); }
+  12%  { opacity: 1;  transform: scale(1.04); }
+  35%  { opacity: 0.85; transform: scale(1); }
+  100% { opacity: 0; }
+}
+.unlock-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 500;
+  background: radial-gradient(
+    ellipse 80% 65% at 50% 50%,
+    rgba(255, 215, 80, 0.75) 0%,
+    rgba(240, 180, 50, 0.55) 25%,
+    rgba(215, 150, 30, 0.30) 55%,
+    rgba(200, 130, 20, 0.08) 80%,
+    transparent 100%
+  );
+  animation: unlock-glow 2.5s ease-out forwards;
+}
+
+@keyframes shimmer-sweep {
+  0%   { transform: translateX(-150%) skewX(-18deg); opacity: 0; }
+  10%  { opacity: 1; }
+  75%  { opacity: 0.85; }
+  100% { transform: translateX(250%) skewX(-18deg); opacity: 0; }
+}
+.unlock-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 501;
+  overflow: hidden;
+}
+.unlock-shimmer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 30%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 250, 190, 0.0) 15%,
+    rgba(255, 245, 160, 0.70) 42%,
+    rgba(255, 255, 220, 0.95) 50%,
+    rgba(255, 245, 160, 0.70) 58%,
+    rgba(255, 250, 190, 0.0) 85%,
+    transparent 100%
+  );
+  animation: shimmer-sweep 1.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s forwards;
+}
+
+/* Glitter sparkle particles */
+@keyframes sparkle-pop {
+  0%   { opacity: 0; transform: scale(0) rotate(-15deg); }
+  25%  { opacity: 1; transform: scale(1.4) rotate(10deg); }
+  65%  { opacity: 0.85; transform: scale(0.9) rotate(5deg); }
+  100% { opacity: 0; transform: scale(0.1) rotate(25deg); }
+}
+.sparkle-dot {
+  position: absolute;
+  pointer-events: none;
+  z-index: 502;
+  border-radius: 1px;
+  clip-path: polygon(50% 0%, 55% 42%, 100% 50%, 55% 58%, 50% 100%, 45% 58%, 0% 50%, 45% 42%);
+  background: radial-gradient(circle, #fff 0%, rgba(255,230,90,0.95) 45%, transparent 80%);
+  box-shadow: 0 0 4px 1px rgba(255,215,80,0.6);
+  animation: sparkle-pop var(--dur) ease-out var(--delay) forwards;
+}
+
+/* Password line unlock animation */
+@keyframes key-line-unlock {
+  0%   { border-bottom-color: rgba(80,55,45,0.2); }
+  35%  { border-bottom-color: rgba(255,215,80,1); filter: drop-shadow(0 1px 8px rgba(255,200,60,0.7)); }
+  100% { border-bottom-color: rgba(255,215,80,0); opacity: 0; }
+}
+.unlock-line-input {
+  animation: key-line-unlock 0.35s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Key cursor for locked entries */
+.cursor-key {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23503730' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7.5' cy='15.5' r='5.5'/%3E%3Cpath d='M21 2l-9.6 9.6'/%3E%3Cpath d='M15.5 7.5l3 3L22 7l-3-3'/%3E%3C/svg%3E") 4 16, pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-flip-container { display: none !important; }
+  .scroll-fallback { display: block !important; }
+}
