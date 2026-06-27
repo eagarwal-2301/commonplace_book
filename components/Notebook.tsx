@@ -366,6 +366,29 @@ export default function Notebook({ entries }: Props) {
     </div>,
   ]
 
+  function closeToFront() {
+    if (!flipperRef.current || currentPage <= 0) return
+    if (currentPage > 3) {
+      flipperRef.current.flip(Math.floor(currentPage * 0.3))
+      setTimeout(() => flipperRef.current?.flip(0), 280)
+    } else {
+      flipperRef.current.flip(0)
+    }
+  }
+
+  function closeToBack() {
+    if (!flipperRef.current) return
+    const last = allPages.length - 1
+    if (currentPage >= last) return
+    const remaining = last - currentPage
+    if (remaining > 3) {
+      flipperRef.current.flip(currentPage + Math.floor(remaining * 0.7))
+      setTimeout(() => flipperRef.current?.flip(last), 280)
+    } else {
+      flipperRef.current.flip(last)
+    }
+  }
+
   return (
     <>
       {icons}
@@ -383,6 +406,10 @@ export default function Notebook({ entries }: Props) {
               ? `translateX(${PAGE_W / 2}px)`
               : 'translateX(0)',
           transition: 'transform 0.5s ease',
+        }}
+        onDoubleClick={(e) => {
+          const x = e.clientX - e.currentTarget.getBoundingClientRect().left
+          if (x < PAGE_W) closeToFront(); else closeToBack()
         }}
       >
         <div key={`pf-${unlocked}`} ref={bookRef} className="page-flip-container" style={{ width: '100%', height: '100%' }}>
@@ -414,6 +441,7 @@ export default function Notebook({ entries }: Props) {
           <>
             <button
               onClick={flipToPrev}
+              onDoubleClick={(e) => { e.stopPropagation(); closeToFront() }}
               aria-label="Previous page"
               style={{
                 position: 'absolute', left: -44, top: '50%', transform: 'translateY(-50%)',
@@ -425,6 +453,7 @@ export default function Notebook({ entries }: Props) {
             </button>
             <button
               onClick={flipToNext}
+              onDoubleClick={(e) => { e.stopPropagation(); closeToBack() }}
               aria-label="Next page"
               style={{
                 position: 'absolute', right: -44, top: '50%', transform: 'translateY(-50%)',
