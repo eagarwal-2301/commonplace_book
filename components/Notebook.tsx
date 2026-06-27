@@ -46,6 +46,30 @@ function BackCover() {
   )
 }
 
+function MoonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  )
+}
+
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4" />
+      <line x1="12" y1="2" x2="12" y2="4" />
+      <line x1="12" y1="20" x2="12" y2="22" />
+      <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" />
+      <line x1="17.66" y1="17.66" x2="19.07" y2="19.07" />
+      <line x1="2" y1="12" x2="4" y2="12" />
+      <line x1="20" y1="12" x2="22" y2="12" />
+      <line x1="4.93" y1="19.07" x2="6.34" y2="17.66" />
+      <line x1="17.66" y1="6.34" x2="19.07" y2="4.93" />
+    </svg>
+  )
+}
+
 function KeyIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -80,6 +104,18 @@ export default function Notebook({ entries }: Props) {
   const [reducedMotion, setReducedMotion] = useState(false)
   const [ready, setReady] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
+
+  const [dark, setDark] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('dark-mode')
+    if (saved === 'true') setDark(true)
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+    localStorage.setItem('dark-mode', String(dark))
+  }, [dark])
 
   // Lock state
   const [unlocked, setUnlocked] = useState(false)
@@ -251,10 +287,13 @@ export default function Notebook({ entries }: Props) {
     setPasswordError(false)
   }
 
+  const arrowColor = dark ? 'rgba(210,190,168,0.35)' : 'rgba(80,55,45,0.35)'
+  const arrowHover = dark ? 'rgba(210,190,168,0.75)' : 'rgba(80,55,45,0.75)'
+
   const icons = (
     <>
       <div className="icon-nav">
-        <Contents entries={visibleEntries} flipTo={flipTo} />
+        <Contents entries={visibleEntries} flipTo={flipTo} dark={dark} />
         <SearchOverlay entries={entries} flipTo={flipTo} unlocked={unlocked} onLockClick={(entryId) => {
           pendingEntryIdRef.current = entryId
           setShowPasswordPrompt(true)
@@ -265,6 +304,13 @@ export default function Notebook({ entries }: Props) {
           aria-label={unlocked ? 'Lock private entries' : 'Unlock private entries'}
         >
           {unlocked ? <UnlockIcon /> : <LockIcon />}
+        </button>
+        <button
+          className="icon-btn"
+          onClick={() => setDark(d => !d)}
+          aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {dark ? <SunIcon /> : <MoonIcon />}
         </button>
       </div>
     </>
@@ -371,7 +417,7 @@ export default function Notebook({ entries }: Props) {
               aria-label="Previous page"
               style={{
                 position: 'absolute', left: -44, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', color: 'rgba(80,55,45,0.35)',
+                background: 'none', border: 'none', color: arrowColor,
                 fontSize: '1.8rem', cursor: 'pointer', lineHeight: 1, padding: '4px 8px',
               }}
             >
@@ -382,7 +428,7 @@ export default function Notebook({ entries }: Props) {
               aria-label="Next page"
               style={{
                 position: 'absolute', right: -44, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', color: 'rgba(80,55,45,0.35)',
+                background: 'none', border: 'none', color: arrowColor,
                 fontSize: '1.8rem', cursor: 'pointer', lineHeight: 1, padding: '4px 8px',
               }}
             >
@@ -394,13 +440,13 @@ export default function Notebook({ entries }: Props) {
                 aria-label="Back to front cover"
                 style={{
                   position: 'absolute', bottom: -36, left: '50%', transform: 'translateX(-50%)',
-                  background: 'none', border: 'none', color: 'rgba(80,55,45,0.35)',
+                  background: 'none', border: 'none', color: arrowColor,
                   fontFamily: 'var(--font-hand)', fontSize: '0.78rem', cursor: 'pointer',
                   letterSpacing: '0.04em', padding: '4px 8px',
                   transition: 'color 0.15s',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(80,55,45,0.75)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(80,55,45,0.35)')}
+                onMouseEnter={e => (e.currentTarget.style.color = arrowHover)}
+                onMouseLeave={e => (e.currentTarget.style.color = arrowColor)}
               >
                 ↩ back to start
               </button>
@@ -421,10 +467,10 @@ export default function Notebook({ entries }: Props) {
               flex: 1,
               background: 'none',
               border: 'none',
-              borderBottom: `1px solid ${passwordError ? 'rgba(192,24,42,0.5)' : 'rgba(80,55,45,0.2)'}`,
+              borderBottom: `1px solid ${passwordError ? 'rgba(192,24,42,0.5)' : dark ? 'rgba(210,190,168,0.25)' : 'rgba(80,55,45,0.2)'}`,
               fontFamily: 'var(--font-hand)',
               fontSize: '0.9rem',
-              color: '#1a1a2e',
+              color: dark ? '#e6ddd0' : '#1a1a2e',
               outline: 'none',
               padding: '4px 0',
             }}
@@ -432,9 +478,9 @@ export default function Notebook({ entries }: Props) {
           <button
             type="submit"
             aria-label="Unlock"
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'rgba(80,55,45,0.35)', lineHeight: 0, transition: 'color 0.15s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'rgba(80,55,45,0.75)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(80,55,45,0.35)')}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: arrowColor, lineHeight: 0, transition: 'color 0.15s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = arrowHover)}
+            onMouseLeave={e => (e.currentTarget.style.color = arrowColor)}
           >
             <KeyIcon />
           </button>

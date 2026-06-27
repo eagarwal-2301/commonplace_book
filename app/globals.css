@@ -6,12 +6,23 @@
   --line-color: #c8d8e8;
   --margin-color: #e8a0a0;
   --ink: #1a1a2e;
+  --bg: #f5f0eb;
+  --page-bg: #fdfcfa;
+  --page-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08);
+  --icon-color: rgba(80, 55, 45, 0.45);
+  --icon-hover: rgba(80, 55, 45, 0.85);
+}
+
+html.dark {
+  --bg: #1a1612;
+  --icon-color: rgba(210, 190, 168, 0.45);
+  --icon-hover: rgba(210, 190, 168, 0.9);
 }
 
 * { box-sizing: border-box; }
 
 body {
-  background: #f5f0eb;
+  background: var(--bg);
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -22,9 +33,13 @@ body {
 }
 
 /* Lined notebook page */
+html.dark .lined-page {
+  box-shadow: var(--page-shadow), 0 0 40px 14px rgba(253,245,215,0.18), 0 0 90px 35px rgba(245,235,200,0.08);
+}
+
 .lined-page {
   position: relative;
-  background-color: #fdfcfa;
+  background-color: var(--page-bg);
   background-image:
     repeating-linear-gradient(
       transparent,
@@ -32,7 +47,7 @@ body {
       var(--line-color) calc(var(--line-h) - 1px),
       var(--line-color) var(--line-h)
     );
-  box-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: var(--page-shadow);
 }
 
 /* Spine + page-lift overlay — sits over the whole book spread */
@@ -88,14 +103,14 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  color: rgba(80, 55, 45, 0.45);
+  color: var(--icon-color);
   padding: 4px;
   line-height: 0;
   transition: color 0.15s;
 }
 
-.icon-btn:hover { color: rgba(80, 55, 45, 0.85); }
-.icon-btn-search:hover { color: #f5f0eb; }
+.icon-btn:hover        { color: var(--icon-hover); }
+.icon-btn-search:hover { color: var(--bg); }
 .icon-btn-lock:hover   { color: #c0182a; }
 
 /* Overlay */
