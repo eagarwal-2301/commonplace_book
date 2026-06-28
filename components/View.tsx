@@ -11,11 +11,12 @@ export default function View({ entries }: Props) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const mq = window.matchMedia('(pointer: coarse) and (hover: none)')
-    setIsMobile(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
+    const check = () =>
+      window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 768
+    setIsMobile(check())
+    const handler = () => setIsMobile(check())
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
   }, [])
 
   if (isMobile === null) return null
