@@ -287,12 +287,32 @@ html.dark .contents-entry-title  { color: #c0b8ac; }
 }
 
 .sticky-grid {
-  column-count: 3;
-  column-gap: 10px;
-  padding: 24px 10px 80px;
+  padding: 24px 24px 80px;
   width: 100vw;
   box-sizing: border-box;
 }
+
+.sticky-heading {
+  display: block;
+  width: 70%;
+  margin: 0 auto 14px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sticky-columns {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sticky-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.sticky-col--offset-left  { margin-top: -44px; }
+.sticky-col--offset-right { margin-top: -38px; }
 
 .sticky-note {
   break-inside: avoid-column;

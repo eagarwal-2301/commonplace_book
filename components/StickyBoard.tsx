@@ -87,7 +87,7 @@ export default function StickyBoard({ entries }: Props) {
 
   useEffect(() => {
     if (!transformRef.current) return
-    transformRef.current.setTransform(0, 0, 1.5, 0)
+    transformRef.current.setTransform(-window.innerWidth / 4, 0, 1.5, 0)
   }, [])
 
   // Focus the password input when the prompt opens
@@ -186,38 +186,61 @@ export default function StickyBoard({ entries }: Props) {
           contentStyle={{ width: '100vw' }}
         >
           <div className="sticky-grid">
-            {reversedEntries.map((entry, i) => {
-              const color = NOTE_COLORS[i % NOTE_COLORS.length]
-              const rotation = ROTATIONS[Number(entry.id) % ROTATIONS.length]
-              return (
-                <div
-                  key={entry.id}
-                  ref={el => { if (el) noteRefs.current.set(entry.id, el) }}
-                  className="sticky-note"
-                  style={{ background: color, transform: `rotate(${rotation}deg)` }}
-                  onDoubleClick={() => {
-                    const el = noteRefs.current.get(entry.id)
-                    if (el && transformRef.current) {
-                      transformRef.current.zoomToElement(el, 2.2, 400, 'easeOut')
-                    }
-                  }}
-                >
-                  <div className="sticky-note-quote">{entry.quote}</div>
-                  <div className="sticky-note-meta">
-                    <span>{formatDate(entry.logged_date, 'short')}</span>
-                    {entry.source_label && (
-                      <>
-                        {' · '}
-                        {entry.resolved_link
-                          ? <a href={entry.resolved_link} target="_blank" rel="noopener noreferrer">{entry.source_label}</a>
-                          : <span>{entry.source_label}</span>
-                        }
-                      </>
-                    )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={dark ? '/mobile-title-dark.png' : '/mobile-title.png'}
+              alt=""
+              className="sticky-heading"
+              draggable={false}
+            />
+            <div className="sticky-columns">
+              {(() => {
+                const third = Math.ceil(reversedEntries.length / 3)
+                const cols = [
+                  reversedEntries.slice(0, third),
+                  reversedEntries.slice(third, third * 2),
+                  reversedEntries.slice(third * 2),
+                ]
+                const offsets = [0, third, third * 2]
+                return cols.map((colEntries, colIdx) => (
+                  <div key={colIdx} className={colIdx === 0 ? 'sticky-col sticky-col--offset-left' : colIdx === 2 ? 'sticky-col sticky-col--offset-right' : 'sticky-col'}>
+                    {colEntries.map((entry, j) => {
+                      const i = offsets[colIdx] + j
+                      const color = NOTE_COLORS[i % NOTE_COLORS.length]
+                      const rotation = ROTATIONS[Number(entry.id) % ROTATIONS.length]
+                      return (
+                        <div
+                          key={entry.id}
+                          ref={el => { if (el) noteRefs.current.set(entry.id, el) }}
+                          className="sticky-note"
+                          style={{ background: color, transform: `rotate(${rotation}deg)` }}
+                          onDoubleClick={() => {
+                            const el = noteRefs.current.get(entry.id)
+                            if (el && transformRef.current) {
+                              transformRef.current.zoomToElement(el, 2.2, 400, 'easeOut')
+                            }
+                          }}
+                        >
+                          <div className="sticky-note-quote">{entry.quote}</div>
+                          <div className="sticky-note-meta">
+                            <span>{formatDate(entry.logged_date, 'short')}</span>
+                            {entry.source_label && (
+                              <>
+                                {' · '}
+                                {entry.resolved_link
+                                  ? <a href={entry.resolved_link} target="_blank" rel="noopener noreferrer">{entry.source_label}</a>
+                                  : <span>{entry.source_label}</span>
+                                }
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                </div>
-              )
-            })}
+                ))
+              })()}
+            </div>
           </div>
         </TransformComponent>
       </TransformWrapper>
