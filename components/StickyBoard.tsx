@@ -85,11 +85,9 @@ export default function StickyBoard({ entries }: Props) {
   )
   const reversedEntries = useMemo(() => [...visibleEntries].reverse(), [visibleEntries])
 
-  // Center the view on the middle column at 1.5× zoom after mount
   useEffect(() => {
     if (!transformRef.current) return
-    const vw = window.innerWidth
-    transformRef.current.setTransform(-vw / 4, 0, 1.5, 0)
+    transformRef.current.setTransform(0, 0, 1.5, 0)
   }, [])
 
   // Focus the password input when the prompt opens

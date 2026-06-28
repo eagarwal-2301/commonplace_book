@@ -102,6 +102,7 @@ function UnlockIcon() {
 export default function Notebook({ entries }: Props) {
   const bookRef = useRef<HTMLDivElement>(null)
   const flipperRef = useRef<any>(null)
+  const flipQueueRef = useRef<number[]>([])
   const [reducedMotion, setReducedMotion] = useState(false)
   const [ready, setReady] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
@@ -177,6 +178,14 @@ export default function Notebook({ entries }: Props) {
       pf.loadFromHTML(bookRef.current.querySelectorAll('.page-element'))
       pf.on('flip', (e: any) => {
         setCurrentPage(typeof e.data === 'number' ? e.data : 0)
+        const queue = flipQueueRef.current
+        if (queue.length > 0) {
+          const next = queue.shift()!
+          const isLast = queue.length === 0
+          ;(pf as any).setting.flippingTime = isLast ? 600 : 420
+          pf.flip(next)
+          if (isLast) setTimeout(() => { ;(pf as any).setting.flippingTime = 600 }, 620)
+        }
       })
       flipperRef.current = pf
       setReady(true)
@@ -200,10 +209,25 @@ export default function Notebook({ entries }: Props) {
     const pageIndex = entryPageMap.get(entryIndex) ?? 0
     if (reducedMotion) {
       document.getElementById(`page-${pageIndex}`)?.scrollIntoView({ behavior: 'smooth' })
-    } else {
-      flipperRef.current?.flip(pageIndex + 1)
+      return
     }
-  }, [reducedMotion, entryPageMap])
+    const pf = flipperRef.current
+    if (!pf) return
+    const targetPage = pageIndex + 1
+    const dist = Math.abs(targetPage - currentPage)
+    if (dist <= 3) {
+      pf.flip(targetPage)
+      return
+    }
+    // Fast multi-hop: 25% → 50% → target, with rapid intermediate flips
+    const dir = targetPage > currentPage ? 1 : -1
+    flipQueueRef.current = [
+      currentPage + dir * Math.round(dist * 0.5),
+      targetPage,
+    ]
+    ;(pf as any).setting.flippingTime = 420
+    pf.flip(currentPage + dir * Math.round(dist * 0.25))
+  }, [reducedMotion, entryPageMap, currentPage])
 
   useEffect(() => {
     if (showPasswordPrompt) setTimeout(() => passwordInputRef.current?.focus(), 50)
@@ -358,7 +382,7 @@ export default function Notebook({ entries }: Props) {
     if (!flipperRef.current || currentPage <= 0) return
     if (currentPage > 3) {
       flipperRef.current.flip(Math.floor(currentPage * 0.3))
-      setTimeout(() => flipperRef.current?.flip(0), 280)
+      setTimeout(() => flipperRef.current?.flip(0), 420)
     } else {
       flipperRef.current.flip(0)
     }
@@ -371,7 +395,7 @@ export default function Notebook({ entries }: Props) {
     const remaining = last - currentPage
     if (remaining > 3) {
       flipperRef.current.flip(currentPage + Math.floor(remaining * 0.7))
-      setTimeout(() => flipperRef.current?.flip(last), 280)
+      setTimeout(() => flipperRef.current?.flip(last), 420)
     } else {
       flipperRef.current.flip(last)
     }
