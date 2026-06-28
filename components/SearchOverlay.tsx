@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import type { Entry } from '@/app/page'
 import type { SearchResult } from '@/lib/search'
 import { formatDate } from '@/lib/formatDate'
@@ -83,7 +84,7 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick, 
         </svg>
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
           className="overlay-scrim"
           onClick={e => { if (e.target === e.currentTarget) close() }}
@@ -212,7 +213,8 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick, 
               </ul>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

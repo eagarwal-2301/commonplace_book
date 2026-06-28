@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import type { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch'
 import type { Entry } from '@/app/page'
@@ -252,7 +253,7 @@ export default function StickyBoard({ entries }: Props) {
         </button>
       </div>
 
-      {showPasswordPrompt && !unlocked && (
+      {showPasswordPrompt && !unlocked && createPortal(
         <div
           className="overlay-scrim"
           onClick={e => { if (e.target === e.currentTarget) dismissPassword() }}
@@ -304,7 +305,8 @@ export default function StickyBoard({ entries }: Props) {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
