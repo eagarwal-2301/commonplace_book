@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import type { Entry } from '@/app/page'
 import { formatDate } from '@/lib/formatDate'
 
 type Props = {
   entries: Entry[]
   flipTo: (index: number) => void
+  mobile?: boolean
 }
 
 function groupByMonth(entries: Entry[]) {
@@ -20,7 +22,8 @@ function groupByMonth(entries: Entry[]) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }))
 }
 
-export default function Contents({ entries, flipTo }: Props) {
+export default function Contents({ entries, flipTo, mobile }: Props) {
+  const s = mobile ? 1.3 : 1
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
 
@@ -42,7 +45,7 @@ export default function Contents({ entries, flipTo }: Props) {
         </svg>
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
           className="overlay-scrim"
           style={{ alignItems: 'flex-start', padding: '6vh 1rem' }}
@@ -55,7 +58,7 @@ export default function Contents({ entries, flipTo }: Props) {
             <div className="contents-header" style={{
               padding: '1rem 1.4rem',
               fontFamily: 'var(--font-hand)',
-              fontSize: '0.7rem',
+              fontSize: `${0.7 * s}rem`,
               color: '#aaa',
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
@@ -64,7 +67,7 @@ export default function Contents({ entries, flipTo }: Props) {
               alignItems: 'center',
             }}>
               <span>Contents</span>
-              <button onClick={close} aria-label="Close" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '1.1rem', lineHeight: 1 }}>×</button>
+              <button onClick={close} aria-label="Close" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: `${1.5 * s}rem`, lineHeight: 1, padding: '0.25rem 0.5rem', margin: '-0.25rem -0.5rem' }}>×</button>
             </div>
 
             {groups.length === 0 && (
@@ -76,7 +79,7 @@ export default function Contents({ entries, flipTo }: Props) {
                 <div className="contents-month" style={{
                   padding: '0.7rem 1.4rem 0.3rem',
                   fontFamily: 'var(--font-hand)',
-                  fontSize: '0.62rem',
+                  fontSize: `${0.62 * s}rem`,
                   color: '#bbb',
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
@@ -100,10 +103,10 @@ export default function Contents({ entries, flipTo }: Props) {
                       alignItems: 'baseline',
                     }}
                   >
-                    <span style={{ fontFamily: 'var(--font-hand)', fontSize: '0.65rem', color: '#bbb', flexShrink: 0, minWidth: 24 }}>
-                      {formatDate(entry.logged_date)}
+                    <span style={{ fontFamily: 'var(--font-hand)', fontSize: `${0.65 * s}rem`, color: '#bbb', flexShrink: 0, minWidth: 24 }}>
+                      {formatDate(entry.logged_date, 'short')}
                     </span>
-                    <span className="contents-entry-title" style={{ fontFamily: 'var(--font-hand)', fontSize: '0.82rem', lineHeight: 1.4 }}>
+                    <span className="contents-entry-title" style={{ fontFamily: 'var(--font-hand)', fontSize: `${0.82 * s}rem`, lineHeight: 1.4 }}>
                       {entry.source_label || entry.quote.slice(0, 60)}
                     </span>
                   </button>
@@ -111,7 +114,8 @@ export default function Contents({ entries, flipTo }: Props) {
               </div>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

@@ -246,12 +246,12 @@ export default function StickyBoard({ entries }: Props) {
       </TransformWrapper>
 
       <div className="mobile-icon-tray">
-        <Contents entries={visibleEntries} flipTo={focusNote} />
+        <Contents entries={visibleEntries} flipTo={focusNote} mobile />
         <SearchOverlay
           entries={entries}
           flipTo={focusNoteFromAll}
           unlocked={unlocked}
-          maxResults={3}
+          maxResults={7}
           onLockClick={(entryId) => {
             pendingEntryIdRef.current = entryId
             setShowPasswordPrompt(true)
