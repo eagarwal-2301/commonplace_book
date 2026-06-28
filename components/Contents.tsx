@@ -7,7 +7,6 @@ import { formatDate } from '@/lib/formatDate'
 type Props = {
   entries: Entry[]
   flipTo: (index: number) => void
-  dark: boolean
 }
 
 function groupByMonth(entries: Entry[]) {
@@ -21,7 +20,7 @@ function groupByMonth(entries: Entry[]) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }))
 }
 
-export default function Contents({ entries, flipTo, dark }: Props) {
+export default function Contents({ entries, flipTo }: Props) {
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
 
@@ -52,10 +51,9 @@ export default function Contents({ entries, flipTo, dark }: Props) {
           aria-modal="true"
           aria-label="Table of contents"
         >
-          <div style={{ width: '100%', maxWidth: 480, maxHeight: '80vh', overflowY: 'auto', background: dark ? '#1e1a16' : '#fff' }}>
-            <div style={{
+          <div className="contents-panel" style={{ width: '100%', maxWidth: 480, maxHeight: '80vh', overflowY: 'auto' }}>
+            <div className="contents-header" style={{
               padding: '1rem 1.4rem',
-              borderBottom: `1px solid ${dark ? '#2a2520' : '#eee'}`,
               fontFamily: 'var(--font-hand)',
               fontSize: '0.7rem',
               color: '#aaa',
@@ -75,14 +73,13 @@ export default function Contents({ entries, flipTo, dark }: Props) {
 
             {groups.map(group => (
               <div key={group.label}>
-                <div style={{
+                <div className="contents-month" style={{
                   padding: '0.7rem 1.4rem 0.3rem',
                   fontFamily: 'var(--font-hand)',
                   fontSize: '0.62rem',
                   color: '#bbb',
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
-                  background: dark ? '#171310' : '#fafafa',
                 }}>
                   {group.label}
                 </div>
@@ -90,12 +87,12 @@ export default function Contents({ entries, flipTo, dark }: Props) {
                   <button
                     key={entry.id}
                     onClick={() => { flipTo(index); close() }}
+                    className="contents-entry"
                     style={{
                       width: '100%',
                       textAlign: 'left',
                       background: 'none',
                       border: 'none',
-                      borderBottom: `1px solid ${dark ? '#272320' : '#f0f0f0'}`,
                       padding: '0.6rem 1.4rem',
                       cursor: 'pointer',
                       display: 'flex',
@@ -106,7 +103,7 @@ export default function Contents({ entries, flipTo, dark }: Props) {
                     <span style={{ fontFamily: 'var(--font-hand)', fontSize: '0.65rem', color: '#bbb', flexShrink: 0, minWidth: 24 }}>
                       {formatDate(entry.logged_date)}
                     </span>
-                    <span style={{ fontFamily: 'var(--font-hand)', fontSize: '0.82rem', color: dark ? '#c0b8ac' : '#333', lineHeight: 1.4 }}>
+                    <span className="contents-entry-title" style={{ fontFamily: 'var(--font-hand)', fontSize: '0.82rem', lineHeight: 1.4 }}>
                       {entry.source_label || entry.quote.slice(0, 60)}
                     </span>
                   </button>

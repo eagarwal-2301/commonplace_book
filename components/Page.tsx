@@ -29,7 +29,7 @@ export default function Page({ page, pageIndex }: Props) {
         }}
       >
         {page.slots.length === 0 ? (
-          <div style={{ fontFamily: 'var(--font-hand)', fontSize: '0.85rem', color: '#aaa', lineHeight: `${LINE_H}px` }}>
+          <div style={{ fontFamily: 'var(--font-hand)', fontSize: '0.85rem', color: 'var(--text-source)', lineHeight: `${LINE_H}px` }}>
             No entries yet.
           </div>
         ) : (
@@ -56,7 +56,7 @@ export default function Page({ page, pageIndex }: Props) {
                     style={{
                       fontFamily: 'var(--font-hand)',
                       fontSize: '0.72rem',
-                      color: '#999',
+                      color: 'var(--text-date)',
                       lineHeight: `${LINE_H}px`,
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
@@ -71,12 +71,12 @@ export default function Page({ page, pageIndex }: Props) {
                           href={slot.entry.resolved_link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ marginLeft: '0.6em', color: '#bbb', textDecoration: 'none' }}
+                          style={{ marginLeft: '0.6em', color: 'var(--text-source)', textDecoration: 'none' }}
                         >
                           {sep}{slot.entry.source_label}
                         </a>
                       ) : (
-                        <span style={{ marginLeft: '0.6em', color: '#bbb' }}>{sep}{slot.entry.source_label}</span>
+                        <span style={{ marginLeft: '0.6em', color: 'var(--text-source)' }}>{sep}{slot.entry.source_label}</span>
                       )
                     })()}
                   </div>
@@ -85,7 +85,7 @@ export default function Page({ page, pageIndex }: Props) {
                       style={{
                         fontFamily: 'var(--font-notes)',
                         fontSize: '0.82rem',
-                        color: '#b0a0a0',
+                        color: 'var(--text-note)',
                         lineHeight: `${LINE_H}px`,
                       }}
                     >
@@ -105,7 +105,7 @@ export default function Page({ page, pageIndex }: Props) {
                       right: 0,
                       fontFamily: 'var(--font-hand)',
                       fontSize: '0.7rem',
-                      color: '#bbb',
+                      color: 'var(--text-subtle)',
                     }}
                   >
                     →
@@ -126,7 +126,7 @@ export default function Page({ page, pageIndex }: Props) {
           right: 10,
           fontFamily: 'var(--font-hand)',
           fontSize: '0.6rem',
-          color: '#ccc',
+          color: 'var(--text-subtle)',
           zIndex: 2,
         }}
       >

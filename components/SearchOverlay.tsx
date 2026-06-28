@@ -99,26 +99,26 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }
                 onKeyDown={e => { if (e.key === 'Enter') runSearch() }}
                 style={{
                   flex: 1,
-                  background: '#fff',
+                  background: 'var(--page-bg)',
                   border: 'none',
-                  borderBottom: '1px solid #ddd',
+                  borderBottom: '1px solid rgba(0,0,0,0.12)',
                   padding: '0.9rem 1rem',
                   fontFamily: 'var(--font-hand)',
                   fontSize: '1.05rem',
-                  color: '#1a1a2e',
+                  color: 'var(--ink)',
                   outline: 'none',
                 }}
               />
               <button
                 onClick={runSearch}
                 style={{
-                  background: '#fff',
+                  background: 'var(--page-bg)',
                   border: 'none',
-                  borderBottom: '1px solid #ddd',
+                  borderBottom: '1px solid rgba(0,0,0,0.12)',
                   padding: '0.9rem 1.1rem',
                   fontFamily: 'var(--font-hand)',
                   fontSize: '0.8rem',
-                  color: '#999',
+                  color: 'var(--text-date)',
                   cursor: 'pointer',
                 }}
               >

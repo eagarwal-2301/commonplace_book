@@ -45,6 +45,8 @@ function mapNotionPage(page: any): RawEntry | null {
   }
 }
 
+import { NOTION_API_VERSION } from './config'
+
 export async function* queryNotionEntries(): AsyncGenerator<RawEntry> {
   const dataSourceId = process.env.NOTION_DATA_SOURCE_ID!
   const token = process.env.NOTION_TOKEN!
@@ -60,7 +62,7 @@ export async function* queryNotionEntries(): AsyncGenerator<RawEntry> {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Notion-Version': '2022-06-28',
+          'Notion-Version': NOTION_API_VERSION,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),

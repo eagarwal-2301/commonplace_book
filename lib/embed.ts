@@ -1,3 +1,5 @@
+import { EMBED_MODEL_DEFAULT } from './config'
+
 export async function withRetry<T>(fn: () => Promise<T>, retries = 5, baseMs = 1000): Promise<T> {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -22,7 +24,7 @@ async function voyageEmbed(texts: string[]): Promise<number[][]> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.EMBED_MODEL ?? 'voyage-3-large',
+        model: process.env.EMBED_MODEL ?? EMBED_MODEL_DEFAULT,
         input: texts,
       }),
     })

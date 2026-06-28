@@ -11,12 +11,21 @@
   --page-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08);
   --icon-color: rgba(80, 55, 45, 0.45);
   --icon-hover: rgba(80, 55, 45, 0.85);
+  --accent: #c0182a;
+  --text-date:   #999;
+  --text-source: #bbb;
+  --text-subtle: #ccc;
+  --text-note:   #b0a0a0;
+  --arrow-color: rgba(80, 55, 45, 0.35);
+  --arrow-hover: rgba(80, 55, 45, 0.75);
 }
 
 html.dark {
   --bg: #1a1612;
   --icon-color: rgba(210, 190, 168, 0.45);
   --icon-hover: rgba(210, 190, 168, 0.9);
+  --arrow-color: rgba(210, 190, 168, 0.35);
+  --arrow-hover: rgba(210, 190, 168, 0.75);
 }
 
 * { box-sizing: border-box; }
@@ -72,21 +81,6 @@ html.dark .lined-page {
 }
 
 
-/* Composition notebook cover */
-.cover-composition {
-  background-color: #c0182a;
-  background-image:
-    radial-gradient(ellipse 25% 35% at 15% 25%, rgba(10,2,2,0.9) 0%, transparent 100%),
-    radial-gradient(ellipse 30% 22% at 80% 18%, rgba(10,2,2,0.85) 0%, transparent 100%),
-    radial-gradient(ellipse 20% 40% at 60% 75%, rgba(10,2,2,0.8) 0%, transparent 100%),
-    radial-gradient(ellipse 35% 18% at 40% 92%, rgba(10,2,2,0.75) 0%, transparent 100%),
-    radial-gradient(ellipse 15% 28% at 90% 58%, rgba(10,2,2,0.85) 0%, transparent 100%),
-    radial-gradient(ellipse 18% 10% at 50% 45%, rgba(10,2,2,0.6) 0%, transparent 100%),
-    radial-gradient(ellipse 30% 15% at 28% 68%, rgba(250,210,210,0.5) 0%, transparent 100%),
-    radial-gradient(ellipse 12% 25% at 72% 38%, rgba(250,210,210,0.4) 0%, transparent 100%),
-    radial-gradient(ellipse 25% 12% at 50% 10%, rgba(210,40,40,0.7) 0%, transparent 100%);
-}
-
 /* Icon nav */
 .icon-nav {
   position: fixed;
@@ -111,7 +105,62 @@ html.dark .lined-page {
 
 .icon-btn:hover        { color: var(--icon-hover); }
 .icon-btn-search:hover { color: var(--bg); }
-.icon-btn-lock:hover   { color: #c0182a; }
+.icon-btn-lock:hover   { color: var(--accent); }
+
+/* Page navigation arrows (prev / next) */
+.page-nav-btn {
+  background: none;
+  border: none;
+  color: var(--arrow-color);
+  font-size: 1.8rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  transition: color 0.15s;
+}
+.page-nav-btn:hover { color: var(--arrow-hover); }
+
+/* "↩ back to start" button */
+.back-to-start-btn {
+  background: none;
+  border: none;
+  color: var(--arrow-color);
+  font-family: var(--font-hand);
+  font-size: 0.78rem;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  transition: color 0.15s;
+}
+.back-to-start-btn:hover { color: var(--arrow-hover); }
+
+/* Password unlock input */
+.password-input {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(80, 55, 45, 0.2);
+  font-family: var(--font-hand);
+  font-size: 0.9rem;
+  color: var(--ink);
+  outline: none;
+  padding: 4px 0;
+}
+.password-input.error { border-bottom-color: rgba(192, 24, 42, 0.5); }
+html.dark .password-input { border-bottom-color: rgba(210, 190, 168, 0.25); }
+
+/* Contents overlay panel */
+.contents-panel   { background: #fff; }
+.contents-header  { border-bottom: 1px solid #eee; }
+.contents-month   { background: #fafafa; }
+.contents-entry   { border-bottom: 1px solid #f0f0f0; }
+.contents-entry-title { color: #333; }
+
+html.dark .contents-panel        { background: #1e1a16; }
+html.dark .contents-header       { border-bottom-color: #2a2520; }
+html.dark .contents-month        { background: #171310; }
+html.dark .contents-entry        { border-bottom-color: #272320; }
+html.dark .contents-entry-title  { color: #c0b8ac; }
 
 /* Overlay */
 .overlay-scrim {

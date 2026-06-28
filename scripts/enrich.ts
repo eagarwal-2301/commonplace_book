@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import Anthropic from '@anthropic-ai/sdk'
 import { withRetry } from '../lib/embed'
+import { CLAUDE_MODEL } from '../lib/config'
 
 let _client: Anthropic | null = null
 function getClient() {
@@ -37,7 +38,7 @@ function isPersonalSource(raw: string): boolean {
 
 async function correctQuoteOnly(quote: string): Promise<string> {
   const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
+    model: CLAUDE_MODEL,
     max_tokens: 512,
     system: QUOTE_CORRECTION_PROMPT,
     messages: [{ role: 'user', content: quote }],
@@ -81,7 +82,7 @@ export async function enrich(raw_source: string, quote: string): Promise<EnrichR
 
   return withRetry(async () => {
     const response = await getClient().messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       tools: [{ type: 'web_search_20250305', name: 'web_search' } as any],

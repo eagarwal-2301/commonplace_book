@@ -287,13 +287,10 @@ export default function Notebook({ entries }: Props) {
     setPasswordError(false)
   }
 
-  const arrowColor = dark ? 'rgba(210,190,168,0.35)' : 'rgba(80,55,45,0.35)'
-  const arrowHover = dark ? 'rgba(210,190,168,0.75)' : 'rgba(80,55,45,0.75)'
-
   const icons = (
     <>
       <div className="icon-nav">
-        <Contents entries={visibleEntries} flipTo={flipTo} dark={dark} />
+        <Contents entries={visibleEntries} flipTo={flipTo} />
         <SearchOverlay entries={entries} flipTo={flipTo} unlocked={unlocked} onLockClick={(entryId) => {
           pendingEntryIdRef.current = entryId
           setShowPasswordPrompt(true)
@@ -443,11 +440,8 @@ export default function Notebook({ entries }: Props) {
               onClick={flipToPrev}
               onDoubleClick={(e) => { e.stopPropagation(); closeToFront() }}
               aria-label="Previous page"
-              style={{
-                position: 'absolute', left: -44, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', color: arrowColor,
-                fontSize: '1.8rem', cursor: 'pointer', lineHeight: 1, padding: '4px 8px',
-              }}
+              className="page-nav-btn"
+              style={{ position: 'absolute', left: -44, top: '50%', transform: 'translateY(-50%)' }}
             >
               ‹
             </button>
@@ -455,11 +449,8 @@ export default function Notebook({ entries }: Props) {
               onClick={flipToNext}
               onDoubleClick={(e) => { e.stopPropagation(); closeToBack() }}
               aria-label="Next page"
-              style={{
-                position: 'absolute', right: -44, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', color: arrowColor,
-                fontSize: '1.8rem', cursor: 'pointer', lineHeight: 1, padding: '4px 8px',
-              }}
+              className="page-nav-btn"
+              style={{ position: 'absolute', right: -44, top: '50%', transform: 'translateY(-50%)' }}
             >
               ›
             </button>
@@ -467,15 +458,8 @@ export default function Notebook({ entries }: Props) {
               <button
                 onClick={() => flipperRef.current?.flip(0)}
                 aria-label="Back to front cover"
-                style={{
-                  position: 'absolute', bottom: -36, left: '50%', transform: 'translateX(-50%)',
-                  background: 'none', border: 'none', color: arrowColor,
-                  fontFamily: 'var(--font-hand)', fontSize: '0.78rem', cursor: 'pointer',
-                  letterSpacing: '0.04em', padding: '4px 8px',
-                  transition: 'color 0.15s',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.color = arrowHover)}
-                onMouseLeave={e => (e.currentTarget.style.color = arrowColor)}
+                className="back-to-start-btn"
+                style={{ position: 'absolute', bottom: -36, left: '50%', transform: 'translateX(-50%)' }}
               >
                 ↩ back to start
               </button>
@@ -489,27 +473,15 @@ export default function Notebook({ entries }: Props) {
             ref={passwordInputRef}
             type="password"
             value={passwordInput}
-            className={lineUnlocking ? 'unlock-line-input' : ''}
+            className={`password-input${passwordError ? ' error' : ''}${lineUnlocking ? ' unlock-line-input' : ''}`}
             onChange={e => { setPasswordInput(e.target.value); setPasswordError(false) }}
             onKeyDown={e => { if (e.key === 'Escape') dismissPassword() }}
-            style={{
-              flex: 1,
-              background: 'none',
-              border: 'none',
-              borderBottom: `1px solid ${passwordError ? 'rgba(192,24,42,0.5)' : dark ? 'rgba(210,190,168,0.25)' : 'rgba(80,55,45,0.2)'}`,
-              fontFamily: 'var(--font-hand)',
-              fontSize: '0.9rem',
-              color: dark ? '#e6ddd0' : '#1a1a2e',
-              outline: 'none',
-              padding: '4px 0',
-            }}
           />
           <button
             type="submit"
             aria-label="Unlock"
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: arrowColor, lineHeight: 0, transition: 'color 0.15s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = arrowHover)}
-            onMouseLeave={e => (e.currentTarget.style.color = arrowColor)}
+            className="page-nav-btn"
+            style={{ position: 'static', fontSize: '1rem', padding: 0, lineHeight: 0 }}
           >
             <KeyIcon />
           </button>
