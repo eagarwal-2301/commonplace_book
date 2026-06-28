@@ -11,12 +11,8 @@ export default function View({ entries }: Props) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const check = () =>
-      window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 768
-    setIsMobile(check())
-    const handler = () => setIsMobile(check())
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
+    const ua = navigator.userAgent
+    setIsMobile(/iPhone|iPod|Android/i.test(ua) || window.innerWidth < 768)
   }, [])
 
   if (isMobile === null) return null
