@@ -21,9 +21,9 @@
 }
 
 html.dark {
-  --bg:          #1a1612;
-  --icon-color:  rgba(210, 190, 168, 0.45);
-  --icon-hover:  rgba(210, 190, 168, 0.9);
+  --bg: #1a1612;
+  --icon-color: rgba(210, 190, 168, 0.45);
+  --icon-hover: rgba(210, 190, 168, 0.9);
   --arrow-color: rgba(210, 190, 168, 0.35);
   --arrow-hover: rgba(210, 190, 168, 0.75);
 }
@@ -264,9 +264,6 @@ html.dark .contents-entry-title  { color: #c0b8ac; }
 .cursor-key {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23503730' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7.5' cy='15.5' r='5.5'/%3E%3Cpath d='M21 2l-9.6 9.6'/%3E%3Cpath d='M15.5 7.5l3 3L22 7l-3-3'/%3E%3C/svg%3E") 4 16, pointer;
 }
-
-.masonry-grid { display: flex; gap: 0.6rem; width: 100%; }
-.masonry-col { display: flex; flex-direction: column; flex: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .page-flip-container { display: none !important; }

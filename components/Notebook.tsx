@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import Masonry from 'react-masonry-css'
 import type { Entry } from '@/app/page'
 import { paginate } from '@/lib/paginate'
-import { formatDate } from '@/lib/formatDate'
 import PageComponent from './Page'
 import SearchOverlay from './SearchOverlay'
 import Contents from './Contents'
@@ -100,48 +98,6 @@ function UnlockIcon() {
   )
 }
 
-function StickyNoteCard({ entry, onClick, large }: {
-  entry: Entry
-  onClick?: () => void
-  large?: boolean
-}) {
-  const rotation = ([-2.5, -1.2, 0, 1.2, 2.5, -1.8] as const)[entry.id % 6]
-  const isPrivate = !entry.published
-  const quote = large
-    ? entry.quote
-    : entry.quote.length > 110 ? entry.quote.slice(0, 110) + '…' : entry.quote
-
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        background: 'var(--page-bg)',
-        padding: large ? '1.75rem' : '0.65rem',
-        marginBottom: '0.6rem',
-        transform: `rotate(${rotation}deg)`,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.13), 0 1px 2px rgba(0,0,0,0.08)',
-        cursor: onClick ? 'pointer' : 'default',
-        maxWidth: large ? 320 : undefined,
-        borderTop: '3px solid var(--accent)',
-      }}
-    >
-      {isPrivate && !large ? (
-        <span style={{ filter: 'blur(4px)', fontFamily: 'var(--font-cursive)', fontSize: '0.7rem', color: 'var(--ink)', display: 'block' }}>
-          {quote}
-        </span>
-      ) : (
-        <p style={{ fontFamily: 'var(--font-cursive)', fontSize: large ? '1.05rem' : '0.7rem', color: 'var(--ink)', margin: 0, lineHeight: 1.65 }}>
-          {quote}
-        </p>
-      )}
-      <p style={{ fontFamily: 'var(--font-hand)', fontSize: large ? '0.75rem' : '0.58rem', color: 'var(--text-date)', margin: '0.4rem 0 0', opacity: 0.75 }}>
-        {formatDate(entry.logged_date, 'short')}
-        {entry.source_label && <> · {entry.source_label}</>}
-      </p>
-    </div>
-  )
-}
-
 export default function Notebook({ entries }: Props) {
   const bookRef = useRef<HTMLDivElement>(null)
   const flipperRef = useRef<any>(null)
@@ -187,28 +143,12 @@ export default function Notebook({ entries }: Props) {
   const [lineUnlocking, setLineUnlocking] = useState(false)
   const passwordInputRef = useRef<HTMLInputElement>(null)
 
-  const [mounted, setMounted] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [detailEntry, setDetailEntry] = useState<Entry | null>(null)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(pointer: coarse) and (hover: none)')
-    setIsMobile(mq.matches)
-    setMounted(true)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-
   const visibleEntries = useMemo(
     () => unlocked ? entries : entries.filter(e => e.published),
     [entries, unlocked]
   )
 
-  const { pages, entryPageMap } = useMemo(
-    () => paginate(visibleEntries),
-    [visibleEntries]
-  )
+  const { pages, entryPageMap } = useMemo(() => paginate(visibleEntries), [visibleEntries])
 
   const flipToNext = useCallback(() => {
     flipperRef.current?.flipNext()
@@ -372,86 +312,6 @@ export default function Notebook({ entries }: Props) {
       </div>
     </>
   )
-
-  if (!mounted) {
-    return <div style={{ minHeight: '100svh', background: 'var(--bg)' }} />
-  }
-
-  if (isMobile) {
-    return (
-      <div style={{ minHeight: '100svh', background: 'var(--bg)' }}>
-        <div className="icon-nav">
-          <SearchOverlay
-            entries={entries}
-            flipTo={(idx) => setDetailEntry(visibleEntries[idx])}
-            unlocked={unlocked}
-            onLockClick={(entryId) => { pendingEntryIdRef.current = entryId; setShowPasswordPrompt(true) }}
-          />
-          <button
-            className={`icon-btn icon-btn-lock${!unlocked ? ' cursor-key' : ''}`}
-            onClick={() => unlocked ? setUnlocked(false) : setShowPasswordPrompt(p => !p)}
-            aria-label={unlocked ? 'Lock private entries' : 'Unlock private entries'}
-          >
-            {unlocked ? <UnlockIcon /> : <LockIcon />}
-          </button>
-          <button className="icon-btn" onClick={() => setDark(d => !d)} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
-            {dark ? <SunIcon /> : <MoonIcon />}
-          </button>
-        </div>
-
-        {showPasswordPrompt && (
-          <div className="overlay-scrim" onClick={dismissPassword}>
-            <form
-              onSubmit={submitPassword}
-              onClick={e => e.stopPropagation()}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0' }}
-            >
-              <input
-                ref={passwordInputRef}
-                value={passwordInput}
-                onChange={e => { setPasswordInput(e.target.value); setPasswordError(false) }}
-                placeholder="password"
-                type="password"
-                autoComplete="current-password"
-                className={`password-input${passwordError ? ' error' : ''}${lineUnlocking ? ' unlock-line-input' : ''}`}
-              />
-            </form>
-          </div>
-        )}
-
-        {detailEntry && (
-          <div className="overlay-scrim" onClick={() => setDetailEntry(null)} style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 0 }}>
-            <div onClick={e => e.stopPropagation()}>
-              <StickyNoteCard entry={detailEntry} large />
-            </div>
-          </div>
-        )}
-
-        <div style={{ padding: '3.5rem 0.6rem 2rem' }}>
-          <Masonry
-            breakpointCols={{ default: 4, 900: 3, 500: 2 }}
-            className="masonry-grid"
-            columnClassName="masonry-col"
-          >
-            {[...visibleEntries].reverse().map(entry => (
-              <StickyNoteCard
-                key={entry.id}
-                entry={entry}
-                onClick={() => {
-                  if (!entry.published && !unlocked) {
-                    pendingEntryIdRef.current = entry.id
-                    setShowPasswordPrompt(true)
-                  } else {
-                    setDetailEntry(entry)
-                  }
-                }}
-              />
-            ))}
-          </Masonry>
-        </div>
-      </div>
-    )
-  }
 
   if (reducedMotion) {
     return (
