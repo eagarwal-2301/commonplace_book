@@ -41,10 +41,13 @@ The whole thing is built so that adding a new entry means one action in Notion �
 | `lib/formatDate.ts` | Date formatting utility |
 | `scripts/sync.ts` | Main sync pipeline: Notion → enrich → embed → Neon |
 | `scripts/enrich.ts` | Claude enrichment: classifies medium, resolves source, corrects quote |
-| `components/Notebook.tsx` | Page-flip book, all UI state (dark mode, lock, search, navigation) |
+| `components/View.tsx` | Client router — detects touch device and renders Notebook or StickyBoard |
+| `components/Notebook.tsx` | Page-flip book, all UI state (lock, search, navigation) |
+| `components/StickyBoard.tsx` | Mobile canvas: 3-column sticky-note grid with pinch-to-zoom and pan |
 | `components/Page.tsx` | Renders one lined notebook page of entries |
 | `components/Contents.tsx` | Table-of-contents overlay |
 | `components/SearchOverlay.tsx` | Semantic + lexical search overlay |
+| `lib/useDarkMode.ts` | Shared dark-mode hook (localStorage + `html.dark` class) |
 
 ---
 

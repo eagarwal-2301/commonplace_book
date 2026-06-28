@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless'
-import Notebook from '@/components/Notebook'
+import View from '@/components/View'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export type Entry = {
   id: number
@@ -29,5 +29,5 @@ async function getEntries(): Promise<Entry[]> {
 
 export default async function Home() {
   const entries = await getEntries()
-  return <Notebook entries={entries} />
+  return <View entries={entries} />
 }

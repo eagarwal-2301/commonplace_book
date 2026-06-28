@@ -1,0 +1,23 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import type { Entry } from '@/app/page'
+import Notebook from './Notebook'
+import StickyBoard from './StickyBoard'
+
+type Props = { entries: Entry[] }
+
+export default function View({ entries }: Props) {
+  const [isMobile, setIsMobile] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse) and (hover: none)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  if (isMobile === null) return null
+  return isMobile ? <StickyBoard entries={entries} /> : <Notebook entries={entries} />
+}

@@ -10,9 +10,10 @@ type Props = {
   flipTo: (index: number) => void
   unlocked: boolean
   onLockClick: (entryId: number) => void
+  maxResults?: number
 }
 
-export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }: Props) {
+export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick, maxResults }: Props) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -49,10 +50,10 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }
       })
       const data = await res.json()
       const all: SearchResult[] = data.results ?? []
-      console.log('[search]', all.map(r => ({ sem_dist: r.sem_dist, score: r.score, source: r.source_label, quote: r.quote.slice(0, 60) })))
-      const display = all.length <= 1 || all[0].sem_dist < 0.20
+      const display = (all.length <= 1 || all[0].sem_dist < 0.20
         ? all.slice(0, 1)
         : all
+      ).slice(0, maxResults ?? all.length)
       setResults(display)
     } catch {
       setResults([])
@@ -85,12 +86,17 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }
       {open && (
         <div
           className="overlay-scrim"
-          onClick={e => { if (e.target === e.currentTarget) close() }}
+          onClick={close}
+          onTouchEnd={e => { e.preventDefault(); close() }}
           role="dialog"
           aria-modal="true"
           aria-label="Search entries"
         >
-          <div style={{ width: '100%', maxWidth: 560, padding: '0 1rem' }}>
+          <div
+            style={{ width: 'min(88vw, 540px)', padding: '0 1rem' }}
+            onClick={e => e.stopPropagation()}
+            onTouchEnd={e => e.stopPropagation()}
+          >
             <div style={{ display: 'flex' }}>
               <input
                 ref={inputRef}
@@ -115,9 +121,9 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }
                   background: 'var(--page-bg)',
                   border: 'none',
                   borderBottom: '1px solid rgba(0,0,0,0.12)',
-                  padding: '0.9rem 1.1rem',
+                  padding: '0.9rem 1.4rem',
                   fontFamily: 'var(--font-hand)',
-                  fontSize: '0.8rem',
+                  fontSize: '1rem',
                   color: 'var(--text-date)',
                   cursor: 'pointer',
                 }}
@@ -127,13 +133,13 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }
             </div>
 
             {loading && (
-              <div style={{ color: 'rgba(255,255,255,0.4)', padding: '1rem', fontFamily: 'var(--font-hand)', fontSize: '0.85rem' }}>
+              <div style={{ color: 'rgba(255,255,255,0.4)', padding: '1rem', fontFamily: 'var(--font-hand)', fontSize: '0.9rem' }}>
                 searching…
               </div>
             )}
 
             {!loading && searched && results.length === 0 && (
-              <div style={{ color: 'rgba(255,255,255,0.3)', padding: '1rem', fontFamily: 'var(--font-hand)', fontSize: '0.85rem' }}>
+              <div style={{ color: 'rgba(255,255,255,0.3)', padding: '1rem', fontFamily: 'var(--font-hand)', fontSize: '0.9rem' }}>
                 nothing found
               </div>
             )}
@@ -161,14 +167,14 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }
                             cursor: undefined,
                           }}
                         >
-                          <div style={{ fontFamily: 'var(--font-cursive)', fontSize: '0.95rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}>
+                          <div style={{ fontFamily: 'var(--font-cursive)', fontSize: '1.1rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}>
                             {clear}{blurred && (
                               <span style={{ filter: 'blur(5px)', userSelect: 'none', color: 'rgba(255,255,255,0.6)' }}>
                                 {' '}{blurred}
                               </span>
                             )}
                           </div>
-                          <div style={{ fontFamily: 'var(--font-hand)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <div style={{ fontFamily: 'var(--font-hand)', fontSize: '0.9rem', color: 'rgba(255,255,255,0.25)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -195,10 +201,10 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick }
                           color: 'rgba(255,255,255,0.85)',
                         }}
                       >
-                        <div style={{ fontFamily: 'var(--font-cursive)', fontSize: '0.95rem', marginBottom: '0.35rem', lineHeight: 1.6 }}>
-                          {r.quote.slice(0, 120)}{r.quote.length > 120 ? '…' : ''}
+                        <div style={{ fontFamily: 'var(--font-cursive)', fontSize: '1.1rem', marginBottom: '0.35rem', lineHeight: 1.6 }}>
+                          {r.quote.slice(0, 80)}{r.quote.length > 80 ? '…' : ''}
                         </div>
-                        <div style={{ fontFamily: 'var(--font-hand)', fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', display: 'flex', gap: '1rem' }}>
+                        <div style={{ fontFamily: 'var(--font-hand)', fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', display: 'flex', gap: '1rem' }}>
                           <span>{formatDate(r.logged_date, 'short')}</span>
                           {r.source_label && <span>{r.source_label}</span>}
                         </div>

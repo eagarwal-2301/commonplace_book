@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import type { Entry } from '@/app/page'
 import { paginate } from '@/lib/paginate'
+import { useDarkMode } from '@/lib/useDarkMode'
 import PageComponent from './Page'
 import SearchOverlay from './SearchOverlay'
 import Contents from './Contents'
@@ -105,17 +106,7 @@ export default function Notebook({ entries }: Props) {
   const [ready, setReady] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
 
-  const [dark, setDark] = useState(false)
-
-  useEffect(() => {
-    const saved = localStorage.getItem('dark-mode')
-    if (saved === 'true') setDark(true)
-  }, [])
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
-    localStorage.setItem('dark-mode', String(dark))
-  }, [dark])
+  const [dark, toggleDark] = useDarkMode()
 
   // Lock state
   const [unlocked, setUnlocked] = useState(false)
@@ -304,7 +295,7 @@ export default function Notebook({ entries }: Props) {
         </button>
         <button
           className="icon-btn"
-          onClick={() => setDark(d => !d)}
+          onClick={toggleDark}
           aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {dark ? <SunIcon /> : <MoonIcon />}
