@@ -19,7 +19,7 @@ export type EnrichResult = {
   corrected_quote: string
 }
 
-const PROMPTS_DIR = path.join(__dirname, '..', 'prompts')
+const PROMPTS_DIR = path.join(process.cwd(), 'prompts')
 const SYSTEM_PROMPT = fs.readFileSync(path.join(PROMPTS_DIR, 'enrich-system.txt'), 'utf-8').trim()
 const QUOTE_CORRECTION_PROMPT = fs.readFileSync(path.join(PROMPTS_DIR, 'quote-correction.txt'), 'utf-8').trim()
 
