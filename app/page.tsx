@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless'
 import Notebook from '@/components/Notebook'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export type Entry = {
   id: number

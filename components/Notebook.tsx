@@ -98,6 +98,23 @@ function UnlockIcon() {
   )
 }
 
+function LinkIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+
 export default function Notebook({ entries }: Props) {
   const bookRef = useRef<HTMLDivElement>(null)
   const flipperRef = useRef<any>(null)
@@ -143,12 +160,32 @@ export default function Notebook({ entries }: Props) {
   const [lineUnlocking, setLineUnlocking] = useState(false)
   const passwordInputRef = useRef<HTMLInputElement>(null)
 
+  const [isMobile, setIsMobile] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    function update() { setIsMobile(window.innerWidth < 700) }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   const visibleEntries = useMemo(
     () => unlocked ? entries : entries.filter(e => e.published),
     [entries, unlocked]
   )
 
-  const { pages, entryPageMap } = useMemo(() => paginate(visibleEntries), [visibleEntries])
+  const { pages, entryPageMap } = useMemo(
+    () => paginate(visibleEntries),
+    [visibleEntries]
+  )
 
   const flipToNext = useCallback(() => {
     flipperRef.current?.flipNext()
@@ -312,6 +349,43 @@ export default function Notebook({ entries }: Props) {
       </div>
     </>
   )
+
+  if (isMobile) {
+    return (
+      <div style={{ minHeight: '100svh', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 2rem' }}>
+        <div className="mobile-icons">
+          <button className="icon-btn" onClick={() => setDark(d => !d)} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {dark ? <SunIcon /> : <MoonIcon />}
+          </button>
+          <button className="icon-btn" onClick={copyLink} aria-label="Copy link">
+            {copied ? <CheckIcon /> : <LinkIcon />}
+          </button>
+        </div>
+        <img
+          src="/front.png"
+          alt="Eesha's Commonplace Notebook"
+          style={{
+            width: 'min(300px, calc(100vw - 56px))',
+            marginTop: '22vh',
+            borderRadius: 3,
+            boxShadow: 'var(--page-shadow)',
+            display: 'block',
+          }}
+        />
+        <p className="mobile-message" style={{
+          fontFamily: 'var(--font-hand)',
+          fontSize: '1.25rem',
+          textAlign: 'center',
+          marginTop: '1.75rem',
+          maxWidth: 240,
+          lineHeight: 1.85,
+          opacity: 0.65,
+        }}>
+          this notebook needs a bit more room to open up — come back on a laptop or tablet
+        </p>
+      </div>
+    )
+  }
 
   if (reducedMotion) {
     return (
