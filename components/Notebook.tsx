@@ -22,14 +22,21 @@ async function checkPassword(pw: string): Promise<boolean> {
 
 const PAGE_W = 440
 const PAGE_H = 600
+const ARTICLE_URL = 'https://www.youtube.com/watch?v=L9awVwLDH18'
 
 function CoverPage() {
   return (
-    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
       <img
         src="/front.png"
         alt="Eesha's Commonplace Notebook"
         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+      <a
+        href={ARTICLE_URL}
+        style={{ position: 'absolute', left: '10%', top: '27%', width: '82%', height: '32%', cursor: 'pointer' }}
+        onClick={e => { e.preventDefault(); e.stopPropagation(); const w = window.open(ARTICLE_URL, '_blank'); w?.blur(); window.focus() }}
+        aria-label="What is a commonplace book?"
       />
     </div>
   )
@@ -338,11 +345,17 @@ export default function Notebook({ entries }: Props) {
           role="document"
           aria-label="Commonplace book entries"
         >
-          <div style={{ height: PAGE_H, marginBottom: '1rem', overflow: 'hidden' }}>
+          <div style={{ height: PAGE_H, marginBottom: '1rem', overflow: 'hidden', position: 'relative' }}>
             <img
               src="/front.png"
               alt="Eesha's Commonplace Notebook"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+            <a
+              href={ARTICLE_URL}
+              style={{ position: 'absolute', left: '10%', top: '27%', width: '82%', height: '32%', cursor: 'pointer' }}
+              onClick={e => { e.preventDefault(); const w = window.open(ARTICLE_URL, '_blank'); w?.blur(); window.focus() }}
+              aria-label="What is a commonplace book?"
             />
           </div>
           {pages.map((page, i) => (

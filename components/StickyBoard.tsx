@@ -187,12 +187,18 @@ export default function StickyBoard({ entries }: Props) {
         >
           <div className="sticky-grid">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={dark ? '/mobile-title-dark.png' : '/mobile-title.png'}
-              alt=""
-              className="sticky-heading"
-              draggable={false}
-            />
+            <a
+              href="https://www.youtube.com/watch?v=L9awVwLDH18"
+              style={{ display: 'block' }}
+              onClick={e => { e.preventDefault(); const w = window.open('https://www.youtube.com/watch?v=L9awVwLDH18', '_blank'); w?.blur(); window.focus() }}
+            >
+              <img
+                src={dark ? '/mobile-title-dark.png' : '/mobile-title.png'}
+                alt="What is a commonplace book?"
+                className="sticky-heading"
+                draggable={false}
+              />
+            </a>
             <div className="sticky-columns">
               {(() => {
                 const third = Math.ceil(reversedEntries.length / 3)
