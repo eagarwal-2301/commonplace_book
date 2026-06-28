@@ -177,6 +177,7 @@ html.dark .contents-entry-title  { color: #c0b8ac; }
   justify-content: center;
   padding-top: 15vh;
   backdrop-filter: blur(2px);
+  touch-action: auto;
 }
 
 /* Gold shimmer on unlock — two layers */

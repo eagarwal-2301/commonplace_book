@@ -86,16 +86,13 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick, 
       {open && (
         <div
           className="overlay-scrim"
-          onClick={close}
-          onTouchEnd={e => { e.preventDefault(); close() }}
+          onClick={e => { if (e.target === e.currentTarget) close() }}
           role="dialog"
           aria-modal="true"
           aria-label="Search entries"
         >
           <div
             style={{ width: 'min(88vw, 540px)', padding: '0 1rem' }}
-            onClick={e => e.stopPropagation()}
-            onTouchEnd={e => e.stopPropagation()}
           >
             <div style={{ display: 'flex' }}>
               <input

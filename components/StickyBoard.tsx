@@ -255,16 +255,13 @@ export default function StickyBoard({ entries }: Props) {
       {showPasswordPrompt && !unlocked && (
         <div
           className="overlay-scrim"
-          onClick={dismissPassword}
-          onTouchEnd={e => { e.preventDefault(); dismissPassword() }}
+          onClick={e => { if (e.target === e.currentTarget) dismissPassword() }}
           role="dialog"
           aria-modal="true"
           aria-label="Unlock private entries"
         >
           <div
             style={{ width: 'min(88vw, 540px)', padding: '0 1rem' }}
-            onClick={e => e.stopPropagation()}
-            onTouchEnd={e => e.stopPropagation()}
           >
             <form onSubmit={submitPassword} style={{ display: 'flex' }}>
               <input

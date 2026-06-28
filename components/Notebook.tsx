@@ -282,7 +282,7 @@ export default function Notebook({ entries }: Props) {
     <>
       <div className="icon-nav">
         <Contents entries={visibleEntries} flipTo={flipTo} />
-        <SearchOverlay entries={entries} flipTo={flipTo} unlocked={unlocked} onLockClick={(entryId) => {
+        <SearchOverlay entries={visibleEntries} flipTo={flipTo} unlocked={unlocked} onLockClick={(entryId) => {
           pendingEntryIdRef.current = entryId
           setShowPasswordPrompt(true)
         }} />
