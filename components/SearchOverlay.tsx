@@ -5,17 +5,16 @@ import { createPortal } from 'react-dom'
 import type { Entry } from '@/app/page'
 import type { SearchResult } from '@/lib/search'
 import { formatDate } from '@/lib/formatDate'
-import { type UnlockLevel, entryUnlocked } from '@/lib/unlock'
 
 type Props = {
   entries: Entry[]
   flipTo: (index: number) => void
-  unlockLevel: UnlockLevel
+  unlockedScope: string | null
   onLockClick: (entryId: number) => void
   maxResults?: number
 }
 
-export default function SearchOverlay({ entries, flipTo, unlockLevel, onLockClick, maxResults }: Props) {
+export default function SearchOverlay({ entries, flipTo, unlockedScope, onLockClick, maxResults }: Props) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -65,8 +64,12 @@ export default function SearchOverlay({ entries, flipTo, unlockLevel, onLockClic
     }
   }
 
+  function isAccessible(r: SearchResult) {
+    return r.published || unlockedScope === 'all' || (!!r.dedicated_to && r.dedicated_to === unlockedScope)
+  }
+
   function handleResultClick(result: SearchResult) {
-    if (!entryUnlocked(result.tags, result.published, unlockLevel)) {
+    if (!isAccessible(result)) {
       onLockClick(result.id)
       close()
       return
@@ -146,7 +149,7 @@ export default function SearchOverlay({ entries, flipTo, unlockLevel, onLockClic
             {results.length > 0 && (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, marginTop: '0.5rem', maxHeight: 'calc(70vh - 60px)', overflowY: 'auto' }}>
                 {results.map(r => {
-                  const isLocked = !entryUnlocked(r.tags, r.published, unlockLevel)
+                  const isLocked = !isAccessible(r)
                   if (isLocked) {
                     const words = r.quote.split(' ')
                     const clear = words.slice(0, 3).join(' ')

@@ -4,21 +4,19 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import type { Entry } from '@/app/page'
 import { paginate } from '@/lib/paginate'
 import { useDarkMode } from '@/lib/useDarkMode'
-import { type UnlockLevel, entryUnlocked } from '@/lib/unlock'
 import PageComponent from './Page'
 import SearchOverlay from './SearchOverlay'
 import Contents from './Contents'
 
 type Props = { entries: Entry[] }
 
-async function checkPassword(pw: string): Promise<UnlockLevel | false> {
+async function checkPassword(pw: string): Promise<{ ok: boolean; scope: string | null }> {
   const res = await fetch('/api/unlock', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: pw }),
   })
-  const { ok, level } = await res.json()
-  return ok ? (level as UnlockLevel) : false
+  return res.json()
 }
 
 const PAGE_W = 440
@@ -118,7 +116,8 @@ export default function Notebook({ entries }: Props) {
   const [dark, toggleDark] = useDarkMode()
 
   // Lock state
-  const [unlockLevel, setUnlockLevel] = useState<UnlockLevel>('none')
+  const [unlockedScope, setUnlockedScope] = useState<string | null>(null)
+  const unlocked = unlockedScope !== null
   const [justUnlocked, setJustUnlocked] = useState(false)
   const pendingEntryIdRef = useRef<number | null>(null)
   const unlockNavigateRef = useRef(false)
@@ -144,8 +143,12 @@ export default function Notebook({ entries }: Props) {
   const passwordInputRef = useRef<HTMLInputElement>(null)
 
   const visibleEntries = useMemo(
-    () => entries.filter(e => entryUnlocked(e.tags, e.published, unlockLevel)),
-    [entries, unlockLevel]
+    () => entries.filter(e =>
+      e.published ||
+      unlockedScope === 'all' ||
+      (!!e.dedicated_to && e.dedicated_to === unlockedScope)
+    ),
+    [entries, unlockedScope]
   )
 
   const { pages, entryPageMap } = useMemo(() => paginate(visibleEntries), [visibleEntries])
@@ -200,7 +203,7 @@ export default function Notebook({ entries }: Props) {
     })
 
     return () => { setReady(false); try { pf?.destroy() } catch {} }
-  }, [reducedMotion, pages.length, unlockLevel])
+  }, [reducedMotion, pages.length, unlocked])
 
   useEffect(() => {
     if (reducedMotion) return
@@ -248,7 +251,7 @@ export default function Notebook({ entries }: Props) {
   }, [passwordError])
 
   // Reset page position when lock state changes
-  useEffect(() => { setCurrentPage(0) }, [unlockLevel])
+  useEffect(() => { setCurrentPage(0) }, [unlockedScope])
 
   // After unlock reinit: flip to pending search result, or to first page if none
   useEffect(() => {
@@ -276,10 +279,11 @@ export default function Notebook({ entries }: Props) {
     if (!passwordInput.trim()) return
     const timer = setTimeout(async () => {
       try {
-        const ok = await checkPassword(passwordInput)
-        if (ok) {
-          setUnlockLevel(ok)
-          if (ok === 'full') { setJustUnlocked(true); unlockNavigateRef.current = true }
+        const { ok, scope } = await checkPassword(passwordInput)
+        if (ok && scope) {
+          setUnlockedScope(scope)
+          setJustUnlocked(true)
+          unlockNavigateRef.current = true
           setLineUnlocking(true)
           setTimeout(() => { setShowPasswordPrompt(false); setPasswordInput(''); setLineUnlocking(false) }, 350)
         }
@@ -291,10 +295,11 @@ export default function Notebook({ entries }: Props) {
   async function submitPassword(e: React.FormEvent) {
     e.preventDefault()
     if (!passwordInput.trim()) return
-    const ok = await checkPassword(passwordInput).catch(() => false as const)
-    if (ok) {
-      setUnlockLevel(ok)
-      if (ok === 'full') { setJustUnlocked(true); unlockNavigateRef.current = true }
+    const result = await checkPassword(passwordInput).catch(() => ({ ok: false, scope: null }))
+    if (result.ok && result.scope) {
+      setUnlockedScope(result.scope)
+      setJustUnlocked(true)
+      unlockNavigateRef.current = true
       setLineUnlocking(true)
       setTimeout(() => { setShowPasswordPrompt(false); setPasswordInput(''); setLineUnlocking(false) }, 350)
     } else {
@@ -312,16 +317,16 @@ export default function Notebook({ entries }: Props) {
     <>
       <div className="icon-nav">
         <Contents entries={visibleEntries} flipTo={flipTo} />
-        <SearchOverlay entries={visibleEntries} flipTo={flipTo} unlockLevel={unlockLevel} onLockClick={(entryId) => {
+        <SearchOverlay entries={visibleEntries} flipTo={flipTo} unlockedScope={unlockedScope} onLockClick={(entryId) => {
           pendingEntryIdRef.current = entryId
           setShowPasswordPrompt(true)
         }} />
         <button
-          className={`icon-btn icon-btn-lock${unlockLevel === 'none' ? ' cursor-key' : ''}`}
-          onClick={() => unlockLevel !== 'none' ? setUnlockLevel('none') : setShowPasswordPrompt(p => !p)}
-          aria-label={unlockLevel !== 'none' ? 'Lock private entries' : 'Unlock private entries'}
+          className={`icon-btn icon-btn-lock${!unlocked ? ' cursor-key' : ''}`}
+          onClick={() => unlocked ? setUnlockedScope(null) : setShowPasswordPrompt(p => !p)}
+          aria-label={unlocked ? 'Lock private entries' : 'Unlock private entries'}
         >
-          {unlockLevel !== 'none' ? <UnlockIcon /> : <LockIcon />}
+          {unlocked ? <UnlockIcon /> : <LockIcon />}
         </button>
         <button
           className="icon-btn"
@@ -436,7 +441,7 @@ export default function Notebook({ entries }: Props) {
           if (x < PAGE_W) closeToFront(); else closeToBack()
         }}
       >
-        <div key={`pf-${unlockLevel}`} ref={bookRef} className="page-flip-container" style={{ width: '100%', height: '100%' }}>
+        <div key={`pf-${unlockedScope}`} ref={bookRef} className="page-flip-container" style={{ width: '100%', height: '100%' }}>
           {allPages}
         </div>
         <div className="book-depth-overlay" />
@@ -494,7 +499,7 @@ export default function Notebook({ entries }: Props) {
           </>
         )}
       </div>
-      {showPasswordPrompt && unlockLevel !== 'full' && (
+      {showPasswordPrompt && !unlocked && (
         <form onSubmit={submitPassword} style={{ width: 320, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <input
             ref={passwordInputRef}

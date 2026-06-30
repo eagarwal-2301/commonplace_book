@@ -20,6 +20,7 @@ export type FullEntry = {
   raw_source: string
   quote: string
   published: boolean
+  dedicated_to: string | null
   medium: string | null
   source_label: string | null
   resolved_link: string | null
@@ -45,14 +46,15 @@ export async function upsertEntry(entry: FullEntry): Promise<void> {
   await getPool().query(
     `INSERT INTO entries
        (notion_page_id, notion_last_edited, logged_date, raw_source, quote,
-        published, medium, source_label, resolved_link, notes, tags, embedding, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::vector, now())
+        published, dedicated_to, medium, source_label, resolved_link, notes, tags, embedding, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::vector, now())
      ON CONFLICT (notion_page_id) DO UPDATE SET
        notion_last_edited = EXCLUDED.notion_last_edited,
        logged_date        = EXCLUDED.logged_date,
        raw_source         = EXCLUDED.raw_source,
        quote              = EXCLUDED.quote,
        published          = EXCLUDED.published,
+       dedicated_to       = EXCLUDED.dedicated_to,
        medium             = EXCLUDED.medium,
        source_label       = EXCLUDED.source_label,
        resolved_link      = EXCLUDED.resolved_link,
@@ -67,6 +69,7 @@ export async function upsertEntry(entry: FullEntry): Promise<void> {
       entry.raw_source,
       entry.quote,
       entry.published,
+      entry.dedicated_to,
       entry.medium,
       entry.source_label,
       entry.resolved_link,
