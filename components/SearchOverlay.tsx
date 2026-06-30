@@ -5,16 +5,17 @@ import { createPortal } from 'react-dom'
 import type { Entry } from '@/app/page'
 import type { SearchResult } from '@/lib/search'
 import { formatDate } from '@/lib/formatDate'
+import { type UnlockLevel, entryUnlocked } from '@/lib/unlock'
 
 type Props = {
   entries: Entry[]
   flipTo: (index: number) => void
-  unlocked: boolean
+  unlockLevel: UnlockLevel
   onLockClick: (entryId: number) => void
   maxResults?: number
 }
 
-export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick, maxResults }: Props) {
+export default function SearchOverlay({ entries, flipTo, unlockLevel, onLockClick, maxResults }: Props) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -65,7 +66,7 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick, 
   }
 
   function handleResultClick(result: SearchResult) {
-    if (!result.published && !unlocked) {
+    if (!entryUnlocked(result.tags, result.published, unlockLevel)) {
       onLockClick(result.id)
       close()
       return
@@ -145,7 +146,7 @@ export default function SearchOverlay({ entries, flipTo, unlocked, onLockClick, 
             {results.length > 0 && (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, marginTop: '0.5rem', maxHeight: 'calc(70vh - 60px)', overflowY: 'auto' }}>
                 {results.map(r => {
-                  const isLocked = !r.published && !unlocked
+                  const isLocked = !entryUnlocked(r.tags, r.published, unlockLevel)
                   if (isLocked) {
                     const words = r.quote.split(' ')
                     const clear = words.slice(0, 3).join(' ')

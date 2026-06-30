@@ -9,6 +9,7 @@ export type SearchResult = {
   score: number
   sem_dist: number
   published: boolean
+  tags: string[]
 }
 
 const RRF_SQL = `
@@ -40,7 +41,7 @@ WITH
     FROM lex l FULL OUTER JOIN sem s ON l.id = s.id
   )
 SELECT e.id, e.quote, e.logged_date::text, e.source_label, e.resolved_link,
-       r.score, COALESCE(s.dist, 1.0) AS sem_dist, e.published
+       r.score, COALESCE(s.dist, 1.0) AS sem_dist, e.published, e.tags
 FROM rrf r JOIN entries e ON e.id = r.id
 LEFT JOIN sem s ON s.id = r.id
 ORDER BY r.score DESC

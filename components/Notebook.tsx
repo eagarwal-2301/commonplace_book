@@ -4,20 +4,21 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import type { Entry } from '@/app/page'
 import { paginate } from '@/lib/paginate'
 import { useDarkMode } from '@/lib/useDarkMode'
+import { type UnlockLevel, entryUnlocked } from '@/lib/unlock'
 import PageComponent from './Page'
 import SearchOverlay from './SearchOverlay'
 import Contents from './Contents'
 
 type Props = { entries: Entry[] }
 
-async function checkPassword(pw: string): Promise<boolean> {
+async function checkPassword(pw: string): Promise<UnlockLevel | false> {
   const res = await fetch('/api/unlock', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: pw }),
   })
-  const { ok } = await res.json()
-  return ok
+  const { ok, level } = await res.json()
+  return ok ? (level as UnlockLevel) : false
 }
 
 const PAGE_W = 440
@@ -117,7 +118,7 @@ export default function Notebook({ entries }: Props) {
   const [dark, toggleDark] = useDarkMode()
 
   // Lock state
-  const [unlocked, setUnlocked] = useState(false)
+  const [unlockLevel, setUnlockLevel] = useState<UnlockLevel>('none')
   const [justUnlocked, setJustUnlocked] = useState(false)
   const pendingEntryIdRef = useRef<number | null>(null)
   const unlockNavigateRef = useRef(false)
