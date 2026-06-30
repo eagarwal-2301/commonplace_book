@@ -146,7 +146,7 @@ export default function Notebook({ entries }: Props) {
     () => entries.filter(e =>
       e.published ||
       unlockedScope === 'all' ||
-      (!!e.dedicated_to && e.dedicated_to === unlockedScope)
+      (!!unlockedScope && !!(e.source_label?.toLowerCase().includes(unlockedScope)))
     ),
     [entries, unlockedScope]
   )

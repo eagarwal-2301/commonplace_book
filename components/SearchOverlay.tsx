@@ -65,7 +65,9 @@ export default function SearchOverlay({ entries, flipTo, unlockedScope, onLockCl
   }
 
   function isAccessible(r: SearchResult) {
-    return r.published || unlockedScope === 'all' || (!!r.dedicated_to && r.dedicated_to === unlockedScope)
+    return r.published ||
+      unlockedScope === 'all' ||
+      (!!unlockedScope && !!(r.source_label?.toLowerCase().includes(unlockedScope)))
   }
 
   function handleResultClick(result: SearchResult) {

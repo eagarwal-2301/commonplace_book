@@ -13,14 +13,13 @@ export type Entry = {
   medium: string | null
   tags: string[]
   published: boolean
-  dedicated_to: string | null
 }
 
 async function getEntries(): Promise<Entry[]> {
   if (!process.env.DATABASE_URL) return []
   const sql = neon(process.env.DATABASE_URL)
   const rows = await sql`
-    SELECT id, logged_date::text, quote, source_label, resolved_link, notes, medium, tags, published, dedicated_to
+    SELECT id, logged_date::text, quote, source_label, resolved_link, notes, medium, tags, published
     FROM entries
     WHERE NOT archived
     ORDER BY logged_date ASC

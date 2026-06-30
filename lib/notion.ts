@@ -5,7 +5,6 @@ export type RawEntry = {
   raw_source: string
   quote: string
   published: boolean
-  dedicated_to: string | null
 }
 
 function extractRichText(value: any): string {
@@ -29,11 +28,8 @@ function mapNotionPage(page: any): RawEntry | null {
   const rawQuote = extractRichText(props['Quote'] ?? props['quote'])
   if (!rawQuote) return null
 
-  const dpPersonMatch = /^\s*dp\s+(parth|mom|yaash|dad)\b\s*/i.exec(rawQuote)
-  const dpGenericMatch = /^\s*dp\b\s*/i.exec(rawQuote)
-  const dpMatch = dpPersonMatch ?? dpGenericMatch
+  const dpMatch = /^\s*dp\b\s*/i.exec(rawQuote)
   const published = !dpMatch
-  const dedicated_to = dpPersonMatch ? dpPersonMatch[1].toLowerCase() : null
   const quote = dpMatch ? rawQuote.slice(dpMatch[0].length).trim() : rawQuote
 
   const raw_source = extractRichText(props['Source'] ?? props['source']) || ''
@@ -46,7 +42,6 @@ function mapNotionPage(page: any): RawEntry | null {
     raw_source,
     quote,
     published,
-    dedicated_to,
   }
 }
 
