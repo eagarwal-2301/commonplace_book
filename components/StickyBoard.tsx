@@ -7,6 +7,7 @@ import type { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch'
 import type { Entry } from '@/app/page'
 import { formatDate } from '@/lib/formatDate'
 import { useDarkMode } from '@/lib/useDarkMode'
+import { type UnlockLevel, entryUnlocked } from '@/lib/unlock'
 import SearchOverlay from './SearchOverlay'
 import Contents from './Contents'
 
@@ -15,14 +16,14 @@ type Props = { entries: Entry[] }
 const NOTE_COLORS = ['#FFF9C4', '#FFE0B2', '#E8F5E9', '#E3F0FF', '#FDE8E8', '#F0EBFF']
 const ROTATIONS = [-2.5, 1.5, -1, 2, -1.8, 0.8, -0.5, 2.5, -2, 1]
 
-async function checkPassword(pw: string): Promise<boolean> {
+async function checkPassword(pw: string): Promise<UnlockLevel | false> {
   const res = await fetch('/api/unlock', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: pw }),
   })
-  const { ok } = await res.json()
-  return ok
+  const { ok, level } = await res.json()
+  return ok ? (level as UnlockLevel) : false
 }
 
 function MoonIcon() {
@@ -74,14 +75,14 @@ export default function StickyBoard({ entries }: Props) {
   const passwordInputRef = useRef<HTMLInputElement>(null)
 
   const [dark, toggleDark] = useDarkMode()
-  const [unlocked, setUnlocked] = useState(false)
+  const [unlockLevel, setUnlockLevel] = useState<UnlockLevel>('none')
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState(false)
 
   const visibleEntries = useMemo(
-    () => unlocked ? entries : entries.filter(e => e.published),
-    [entries, unlocked]
+    () => entries.filter(e => entryUnlocked(e.tags, e.published, unlockLevel)),
+    [entries, unlockLevel]
   )
   const reversedEntries = useMemo(() => [...visibleEntries].reverse(), [visibleEntries])
 
@@ -104,7 +105,7 @@ export default function StickyBoard({ entries }: Props) {
 
   // After unlock, navigate to any pending entry from a search result click
   useEffect(() => {
-    if (!unlocked || pendingEntryIdRef.current === null) return
+    if (unlockLevel === 'none' || pendingEntryIdRef.current === null) return
     const entryId = pendingEntryIdRef.current
     pendingEntryIdRef.current = null
     const timer = setTimeout(() => {
@@ -114,7 +115,7 @@ export default function StickyBoard({ entries }: Props) {
       }
     }, 300)
     return () => clearTimeout(timer)
-  }, [unlocked])
+  }, [unlockLevel])
 
   // Silently check password 400ms after each keystroke
   useEffect(() => {
@@ -123,7 +124,7 @@ export default function StickyBoard({ entries }: Props) {
       try {
         const ok = await checkPassword(passwordInput)
         if (ok) {
-          setUnlocked(true)
+          setUnlockLevel(ok)
           setShowPasswordPrompt(false)
           setPasswordInput('')
         }
@@ -135,9 +136,9 @@ export default function StickyBoard({ entries }: Props) {
   async function submitPassword(e: React.FormEvent) {
     e.preventDefault()
     if (!passwordInput.trim()) return
-    const ok = await checkPassword(passwordInput).catch(() => false)
+    const ok = await checkPassword(passwordInput).catch(() => false as const)
     if (ok) {
-      setUnlocked(true)
+      setUnlockLevel(ok)
       setShowPasswordPrompt(false)
       setPasswordInput('')
     } else {
@@ -256,7 +257,7 @@ export default function StickyBoard({ entries }: Props) {
         <SearchOverlay
           entries={entries}
           flipTo={focusNoteFromAll}
-          unlocked={unlocked}
+          unlockLevel={unlockLevel}
           maxResults={7}
           onLockClick={(entryId) => {
             pendingEntryIdRef.current = entryId
@@ -265,11 +266,11 @@ export default function StickyBoard({ entries }: Props) {
         />
         <button
           className="mobile-icon-btn"
-          onClick={() => unlocked ? setUnlocked(false) : setShowPasswordPrompt(p => !p)}
-          style={{ color: unlocked ? 'var(--accent)' : undefined }}
-          aria-label={unlocked ? 'Lock private entries' : 'Unlock private entries'}
+          onClick={() => unlockLevel !== 'none' ? setUnlockLevel('none') : setShowPasswordPrompt(p => !p)}
+          style={{ color: unlockLevel !== 'none' ? 'var(--accent)' : undefined }}
+          aria-label={unlockLevel !== 'none' ? 'Lock private entries' : 'Unlock private entries'}
         >
-          {unlocked ? <UnlockIcon /> : <LockIcon />}
+          {unlockLevel !== 'none' ? <UnlockIcon /> : <LockIcon />}
         </button>
         <button
           className="mobile-icon-btn"
@@ -280,7 +281,7 @@ export default function StickyBoard({ entries }: Props) {
         </button>
       </div>
 
-      {showPasswordPrompt && !unlocked && createPortal(
+      {showPasswordPrompt && unlockLevel !== 'full' && createPortal(
         <div
           className="overlay-scrim"
           onClick={e => { if (e.target === e.currentTarget) dismissPassword() }}

@@ -144,8 +144,8 @@ export default function Notebook({ entries }: Props) {
   const passwordInputRef = useRef<HTMLInputElement>(null)
 
   const visibleEntries = useMemo(
-    () => unlocked ? entries : entries.filter(e => e.published),
-    [entries, unlocked]
+    () => entries.filter(e => entryUnlocked(e.tags, e.published, unlockLevel)),
+    [entries, unlockLevel]
   )
 
   const { pages, entryPageMap } = useMemo(() => paginate(visibleEntries), [visibleEntries])
@@ -200,7 +200,7 @@ export default function Notebook({ entries }: Props) {
     })
 
     return () => { setReady(false); try { pf?.destroy() } catch {} }
-  }, [reducedMotion, pages.length, unlocked])
+  }, [reducedMotion, pages.length, unlockLevel])
 
   useEffect(() => {
     if (reducedMotion) return
@@ -248,7 +248,7 @@ export default function Notebook({ entries }: Props) {
   }, [passwordError])
 
   // Reset page position when lock state changes
-  useEffect(() => { setCurrentPage(0) }, [unlocked])
+  useEffect(() => { setCurrentPage(0) }, [unlockLevel])
 
   // After unlock reinit: flip to pending search result, or to first page if none
   useEffect(() => {
@@ -278,9 +278,8 @@ export default function Notebook({ entries }: Props) {
       try {
         const ok = await checkPassword(passwordInput)
         if (ok) {
-          setUnlocked(true)
-          setJustUnlocked(true)
-          unlockNavigateRef.current = true
+          setUnlockLevel(ok)
+          if (ok === 'full') { setJustUnlocked(true); unlockNavigateRef.current = true }
           setLineUnlocking(true)
           setTimeout(() => { setShowPasswordPrompt(false); setPasswordInput(''); setLineUnlocking(false) }, 350)
         }
@@ -292,11 +291,10 @@ export default function Notebook({ entries }: Props) {
   async function submitPassword(e: React.FormEvent) {
     e.preventDefault()
     if (!passwordInput.trim()) return
-    const ok = await checkPassword(passwordInput).catch(() => false)
+    const ok = await checkPassword(passwordInput).catch(() => false as const)
     if (ok) {
-      setUnlocked(true)
-      setJustUnlocked(true)
-      unlockNavigateRef.current = true
+      setUnlockLevel(ok)
+      if (ok === 'full') { setJustUnlocked(true); unlockNavigateRef.current = true }
       setLineUnlocking(true)
       setTimeout(() => { setShowPasswordPrompt(false); setPasswordInput(''); setLineUnlocking(false) }, 350)
     } else {
@@ -314,16 +312,16 @@ export default function Notebook({ entries }: Props) {
     <>
       <div className="icon-nav">
         <Contents entries={visibleEntries} flipTo={flipTo} />
-        <SearchOverlay entries={visibleEntries} flipTo={flipTo} unlocked={unlocked} onLockClick={(entryId) => {
+        <SearchOverlay entries={visibleEntries} flipTo={flipTo} unlockLevel={unlockLevel} onLockClick={(entryId) => {
           pendingEntryIdRef.current = entryId
           setShowPasswordPrompt(true)
         }} />
         <button
-          className={`icon-btn icon-btn-lock${!unlocked ? ' cursor-key' : ''}`}
-          onClick={() => unlocked ? setUnlocked(false) : setShowPasswordPrompt(p => !p)}
-          aria-label={unlocked ? 'Lock private entries' : 'Unlock private entries'}
+          className={`icon-btn icon-btn-lock${unlockLevel === 'none' ? ' cursor-key' : ''}`}
+          onClick={() => unlockLevel !== 'none' ? setUnlockLevel('none') : setShowPasswordPrompt(p => !p)}
+          aria-label={unlockLevel !== 'none' ? 'Lock private entries' : 'Unlock private entries'}
         >
-          {unlocked ? <UnlockIcon /> : <LockIcon />}
+          {unlockLevel !== 'none' ? <UnlockIcon /> : <LockIcon />}
         </button>
         <button
           className="icon-btn"
@@ -438,7 +436,7 @@ export default function Notebook({ entries }: Props) {
           if (x < PAGE_W) closeToFront(); else closeToBack()
         }}
       >
-        <div key={`pf-${unlocked}`} ref={bookRef} className="page-flip-container" style={{ width: '100%', height: '100%' }}>
+        <div key={`pf-${unlockLevel}`} ref={bookRef} className="page-flip-container" style={{ width: '100%', height: '100%' }}>
           {allPages}
         </div>
         <div className="book-depth-overlay" />
@@ -496,7 +494,7 @@ export default function Notebook({ entries }: Props) {
           </>
         )}
       </div>
-      {showPasswordPrompt && !unlocked && (
+      {showPasswordPrompt && unlockLevel !== 'full' && (
         <form onSubmit={submitPassword} style={{ width: 320, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <input
             ref={passwordInputRef}
